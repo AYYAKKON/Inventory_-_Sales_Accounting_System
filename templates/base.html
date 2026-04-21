@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Inventory Management System{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="{% url 'malar_app:home' %}">
+                <span class="text-warning">📦</span> Inventory Pro
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'malar_app:home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'malar_app:product-list' %}">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'malar_app:category-list' %}">Categories</a>
+                    </li>
+                    {% if user.is_staff %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            ⚙️ Admin Tools
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
+                            <li><a class="dropdown-item" href="{% url 'malar_app:admin-dashboard' %}">📊 Admin Dashboard</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">Product Management</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'malar_app:product-create' %}">➕ Create Product</a></li>
+                            <li><a class="dropdown-item" href="{% url 'malar_app:product-import' %}">📥 Bulk Import</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">Sales & Customers</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'malar_app:customer-list' %}">👥 Customers</a></li>
+                            <li><a class="dropdown-item" href="{% url 'malar_app:dealer-list' %}">🏢 Dealers</a></li>
+                            <li><a class="dropdown-item" href="{% url 'malar_app:invoice-list' %}">📄 Invoices</a></li>
+                            <li><a class="dropdown-item" href="{% url 'malar_app:invoice-create' %}">➕ Create Invoice</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">Purchases & Sales (New)</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'malar_app:purchase-list' %}">📥 Purchases</a></li>
+                            <li><a class="dropdown-item" href="{% url 'malar_app:purchase-create' %}">➕ Add Purchase</a></li>
+                            <li><a class="dropdown-item" href="{% url 'malar_app:sale-list' %}">📤 Sales</a></li>
+                            <li><a class="dropdown-item" href="{% url 'malar_app:sale-create' %}">➕ New Sale</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">Operations</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'malar_app:stock-management' %}">📦 Stock Management</a></li>
+                            <li><a class="dropdown-item" href="{% url 'malar_app:analytics-dashboard' %}">📊 Analytics</a></li>
+                            <li><a class="dropdown-item" href="{% url 'malar_app:inventory-report' %}">📋 Reports</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'admin:index' %}">🔐 Django Admin</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            👤 {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><h6 class="dropdown-header">{{ user.get_full_name|default:user.username }}</h6></li>
+                            {% if user.is_staff %}
+                            <li><a class="dropdown-item" href="{% url 'admin:index' %}">🔐 Admin Panel</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% endif %}
+                            <li><a class="dropdown-item" href="{% url 'malar_app:logout' %}">🚪 Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'malar_app:login' %}">🔑 Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="py-4">
+        <div class="container-fluid">
+            {% if messages %}
+            <div class="alert-messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2026 Inventory Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{% static 'js/script.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

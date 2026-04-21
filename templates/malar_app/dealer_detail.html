@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}{{ dealer.name }} - Dealer Details{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'malar_app:home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'malar_app:dealer-list' %}">Dealers</a></li>
+            <li class="breadcrumb-item active">{{ dealer.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="mb-0">👥 {{ dealer.name }}</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Status Badge -->
+                    <div class="mb-4">
+                        {% if dealer.is_active %}
+                        <span class="badge bg-success fs-6">Active</span>
+                        {% else %}
+                        <span class="badge bg-secondary fs-6">Inactive</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Company Information -->
+                    <h5 class="mb-3 border-bottom pb-2">Company Information</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Contact Person:</strong>
+                            <p>{{ dealer.contact_person }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Commission Rate:</strong>
+                            <p>{{ dealer.commission_percentage }}%</p>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <h5 class="mb-3 border-bottom pb-2">Contact Information</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Email:</strong>
+                            <p><a href="mailto:{{ dealer.email }}">{{ dealer.email }}</a></p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Phone:</strong>
+                            <p><a href="tel:{{ dealer.phone }}">{{ dealer.phone }}</a></p>
+                        </div>
+                    </div>
+
+                    <!-- Address Information -->
+                    <h5 class="mb-3 border-bottom pb-2">Address</h5>
+                    <div class="mb-3">
+                        <strong>Street Address:</strong>
+                        <p>{{ dealer.address }}</p>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>City:</strong>
+                            <p>{{ dealer.city }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>State/Province:</strong>
+                            <p>{{ dealer.state }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Postal Code:</strong>
+                            <p>{{ dealer.postal_code }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Country:</strong>
+                            <p>{{ dealer.country }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Dates -->
+                    <h5 class="mb-3 border-bottom pb-2 mt-4">Record Information</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Created:</strong>
+                            <p>{{ dealer.created_at|date:"M d, Y H:i" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Last Updated:</strong>
+                            <p>{{ dealer.updated_at|date:"M d, Y H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Actions -->
+            {% if user.is_staff %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'malar_app:dealer-update' dealer.pk %}" class="btn btn-warning w-100 mb-2">
+                        ✏️ Edit Dealer
+                    </a>
+                    <a href="{% url 'malar_app:dealer-delete' dealer.pk %}" class="btn btn-danger w-100 mb-2">
+                        🗑️ Delete Dealer
+                    </a>
+                    <a href="{% url 'malar_app:dealer-list' %}" class="btn btn-outline-primary w-100">
+                        ← Back to Dealers
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Commission Info Card -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">💰 Commission</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>Rate:</strong></p>
+                    <p class="display-6 text-primary mb-0">{{ dealer.commission_percentage }}%</p>
+                    <small class="text-muted">Commission on each sale</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Create{% endif %} Dealer{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto">
+            <h1 class="mb-3">
+                {% if form.instance.pk %}
+                    ✏️ Edit Dealer
+                {% else %}
+                    ➕ Add New Dealer
+                {% endif %}
+            </h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Info -->
+                        <h5 class="mb-3 border-bottom pb-2">Company Information</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.name.id_for_label }}" class="form-label fw-bold">Company Name *</label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">{{ form.name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.contact_person.id_for_label }}" class="form-label fw-bold">Contact Person *</label>
+                                {{ form.contact_person }}
+                                {% if form.contact_person.errors %}
+                                <div class="invalid-feedback d-block">{{ form.contact_person.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Contact Info -->
+                        <h5 class="mb-3 border-bottom pb-2 mt-4">Contact Information</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label fw-bold">Email *</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                <div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.phone.id_for_label }}" class="form-label fw-bold">Phone *</label>
+                                {{ form.phone }}
+                                {% if form.phone.errors %}
+                                <div class="invalid-feedback d-block">{{ form.phone.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Address -->
+                        <h5 class="mb-3 border-bottom pb-2 mt-4">Address</h5>
+                        <div class="mb-3">
+                            <label for="{{ form.address.id_for_label }}" class="form-label fw-bold">Street Address *</label>
+                            {{ form.address }}
+                            {% if form.address.errors %}
+                            <div class="invalid-feedback d-block">{{ form.address.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.city.id_for_label }}" class="form-label fw-bold">City *</label>
+                                {{ form.city }}
+                                {% if form.city.errors %}
+                                <div class="invalid-feedback d-block">{{ form.city.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.state.id_for_label }}" class="form-label fw-bold">State/Province *</label>
+                                {{ form.state }}
+                                {% if form.state.errors %}
+                                <div class="invalid-feedback d-block">{{ form.state.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.postal_code.id_for_label }}" class="form-label fw-bold">Postal Code *</label>
+                                {{ form.postal_code }}
+                                {% if form.postal_code.errors %}
+                                <div class="invalid-feedback d-block">{{ form.postal_code.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.country.id_for_label }}" class="form-label fw-bold">Country *</label>
+                                {{ form.country }}
+                                {% if form.country.errors %}
+                                <div class="invalid-feedback d-block">{{ form.country.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Commission -->
+                        <h5 class="mb-3 border-bottom pb-2 mt-4">Commission Information</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.commission_percentage.id_for_label }}" class="form-label fw-bold">Commission Percentage (%)</label>
+                                {{ form.commission_percentage }}
+                                {% if form.commission_percentage.errors %}
+                                <div class="invalid-feedback d-block">{{ form.commission_percentage.errors.0 }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">Dealer's commission on sales (e.g., 5 for 5%)</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.is_active.id_for_label }}" class="form-check-label fw-bold">
+                                    {{ form.is_active }}
+                                    Active
+                                </label>
+                                <small class="form-text text-muted d-block">Uncheck to deactivate this dealer</small>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                {% if form.instance.pk %}
+                                    💾 Update Dealer
+                                {% else %}
+                                    ✔️ Create Dealer
+                                {% endif %}
+                            </button>
+                            <a href="{% url 'malar_app:dealer-list' %}" class="btn btn-outline-secondary btn-lg">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card mt-4 bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">💡 Tips</h5>
+                    <ul class="mb-0">
+                        <li><strong>Company Name:</strong> Official dealer company name</li>
+                        <li><strong>Contact Person:</strong> Primary contact at the dealer</li>
+                        <li><strong>Commission:</strong> Percentage commission on each sale (0-100)</li>
+                        <li><strong>Active:</strong> Only active dealers can be assigned to invoices</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

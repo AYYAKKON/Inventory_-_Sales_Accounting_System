@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Add Purchase - Inventory Management{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto">
+            <h1 class="mb-2">📥 Record New Purchase</h1>
+            <p class="text-muted">Record a purchase from dealer. Stock will be automatically updated.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">📋 Purchase Details</h5>
+                </div>
+                <div class="card-body p-5">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Purchase ID -->
+                        <div class="mb-4">
+                            <label for="{{ form.purchase_id.id_for_label }}" class="form-label fw-bold">🏷️ Purchase ID / Invoice No *</label>
+                            {{ form.purchase_id }}
+                            {% if form.purchase_id.errors %}
+                            <div class="alert alert-danger small mt-2 mb-0">
+                                <strong>Error:</strong> {{ form.purchase_id.errors.0 }}
+                            </div>
+                            {% endif %}
+                            <small class="text-muted d-block mt-2">Unique purchase/invoice number</small>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Dealer & Product Row -->
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.dealer.id_for_label }}" class="form-label fw-bold">🏢 Dealer *</label>
+                                {{ form.dealer }}
+                                {% if form.dealer.errors %}
+                                <div class="alert alert-danger small mt-2 mb-0">
+                                    <strong>Error:</strong> {{ form.dealer.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.product.id_for_label }}" class="form-label fw-bold">📦 Product *</label>
+                                {{ form.product }}
+                                {% if form.product.errors %}
+                                <div class="alert alert-danger small mt-2 mb-0">
+                                    <strong>Error:</strong> {{ form.product.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Quantity & Price Row -->
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.quantity.id_for_label }}" class="form-label fw-bold">📊 Quantity *</label>
+                                {{ form.quantity }}
+                                {% if form.quantity.errors %}
+                                <div class="alert alert-danger small mt-2 mb-0">
+                                    <strong>Error:</strong> {{ form.quantity.errors.0 }}
+                                </div>
+                                {% endif %}
+                                <small class="text-muted d-block mt-2">Number of units purchased</small>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.price.id_for_label }}" class="form-label fw-bold">💰 Unit Price *</label>
+                                {{ form.price }}
+                                {% if form.price.errors %}
+                                <div class="alert alert-danger small mt-2 mb-0">
+                                    <strong>Error:</strong> {{ form.price.errors.0 }}
+                                </div>
+                                {% endif %}
+                                <small class="text-muted d-block mt-2">Price per unit</small>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Purchase Date -->
+                        <div class="mb-4">
+                            <label for="{{ form.date.id_for_label }}" class="form-label fw-bold">📅 Purchase Date *</label>
+                            {{ form.date }}
+                            {% if form.date.errors %}
+                            <div class="alert alert-danger small mt-2 mb-0">
+                                <strong>Error:</strong> {{ form.date.errors.0 }}
+                            </div>
+                            {% endif %}
+                            <small class="text-muted d-block mt-2">Date and time of the purchase</small>
+                        </div>
+
+                        <!-- Form Errors (General) -->
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Form Error:</strong>
+                            <ul class="mb-0">
+                                {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endif %}
+
+                        <!-- Buttons -->
+                        <div class="mt-5 pt-4 border-top">
+                            <button type="submit" class="btn btn-info btn-lg px-5">
+                                ✅ Record Purchase
+                            </button>
+                            <a href="{% url 'malar_app:purchase-list' %}" class="btn btn-outline-secondary btn-lg px-5">
+                                ❌ Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Help Text -->
+            <div class="alert alert-info mt-4">
+                <strong>💡 Tips:</strong>
+                <ul class="mb-0 mt-2">
+                    <li>Purchase ID should be unique (e.g., PUR-001, PUR-002)</li>
+                    <li>Stock will be automatically increased based on quantity</li>
+                    <li>Date will be auto-filled with current date/time</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

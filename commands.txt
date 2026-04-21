@@ -1,0 +1,31 @@
+# Project Setup and Run Commands
+
+Here are all the commands used to set up and run this project from scratch:
+
+## 1. Create and Activate Virtual Environment
+```cmd
+python -m venv .venv
+.\.venv\Scripts\activate.bat
+```
+
+## 2. Install Project Dependencies
+These specific versions are required to avoid compatibility issues with Django 3.2 and Python 3.11.
+```cmd
+python -m pip install django==3.2.23 djongo==1.3.6 "pymongo<4" Pillow==12.1.1 django-crispy-forms==1.14.0 crispy-bootstrap5==0.6
+```
+
+## 3. Apply Database Migrations
+Create the necessary MongoDB collections.
+```cmd
+python manage.py makemigrations
+python manage.py migrate
+```
+
+## 4. Run the Development Server
+Starts the Django server at http://127.0.0.1:8000/
+```cmd
+python manage.py runserver
+```
+
+## Shortcuts
+- Use `run.bat` to quickly start the server without manually typing the commands.

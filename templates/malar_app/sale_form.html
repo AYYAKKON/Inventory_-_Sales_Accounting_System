@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Record Sale - Inventory Management{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto">
+            <h1 class="mb-2">📤 Record New Sale</h1>
+            <p class="text-muted">Record a direct sale to customer. Stock will be automatically updated.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">📋 Sale Details</h5>
+                </div>
+                <div class="card-body p-5">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Sale ID -->
+                        <div class="mb-4">
+                            <label for="{{ form.sale_id.id_for_label }}" class="form-label fw-bold">🏷️ Sale ID *</label>
+                            {{ form.sale_id }}
+                            {% if form.sale_id.errors %}
+                            <div class="alert alert-danger small mt-2 mb-0">
+                                <strong>Error:</strong> {{ form.sale_id.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Product Selection -->
+                        <div class="mb-4">
+                            <label for="{{ form.product.id_for_label }}" class="form-label fw-bold">📦 Product *</label>
+                            {{ form.product }}
+                            {% if form.product.errors %}
+                            <div class="alert alert-danger small mt-2 mb-0">
+                                <strong>Error:</strong> {{ form.product.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Quantity & Price Row -->
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.quantity.id_for_label }}" class="form-label fw-bold">📊 Quantity *</label>
+                                {{ form.quantity }}
+                                {% if form.quantity.errors %}
+                                <div class="alert alert-danger small mt-2 mb-0">
+                                    <strong>Error:</strong> {{ form.quantity.errors.0 }}
+                                </div>
+                                {% endif %}
+                                <small class="text-muted d-block mt-2">Number of units sold</small>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.total_price.id_for_label }}" class="form-label fw-bold">💰 Total Price *</label>
+                                {{ form.total_price }}
+                                {% if form.total_price.errors %}
+                                <div class="alert alert-danger small mt-2 mb-0">
+                                    <strong>Error:</strong> {{ form.total_price.errors.0 }}
+                                </div>
+                                {% endif %}
+                                <small class="text-muted d-block mt-2">Total sale amount</small>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Sale Date -->
+                        <div class="mb-4">
+                            <label for="{{ form.date.id_for_label }}" class="form-label fw-bold">📅 Sale Date *</label>
+                            {{ form.date }}
+                            {% if form.date.errors %}
+                            <div class="alert alert-danger small mt-2 mb-0">
+                                <strong>Error:</strong> {{ form.date.errors.0 }}
+                            </div>
+                            {% endif %}
+                            <small class="text-muted d-block mt-2">Date and time of the sale</small>
+                        </div>
+
+                        <!-- Form Errors (General) -->
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Form Error:</strong>
+                            <ul class="mb-0">
+                                {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endif %}
+
+                        <!-- Buttons -->
+                        <div class="mt-5 pt-4 border-top">
+                            <button type="submit" class="btn btn-success btn-lg px-5">
+                                ✅ Record Sale
+                            </button>
+                            <a href="{% url 'malar_app:sale-list' %}" class="btn btn-outline-secondary btn-lg px-5">
+                                ❌ Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Help Text -->
+            <div class="alert alert-info mt-4">
+                <strong>💡 Tips:</strong>
+                <ul class="mb-0 mt-2">
+                    <li>Sale ID should be unique (e.g., SAL-001, SAL-002)</li>
+                    <li>Stock will be automatically decreased based on quantity</li>
+                    <li>Date will be auto-filled with current date/time</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

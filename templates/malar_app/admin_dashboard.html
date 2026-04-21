@@ -1,0 +1,701 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Inventory System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .border-left-primary { border-left: 4px solid #007bff; }
+    .border-left-success { border-left: 4px solid #28a745; }
+    .border-left-warning { border-left: 4px solid #ffc107; }
+    .border-left-danger { border-left: 4px solid #dc3545; }
+    .border-left-info { border-left: 4px solid #17a2b8; }
+    .metric-label { font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+    .chart-container { position: relative; height: 300px; margin-bottom: 2rem; }
+    .small-chart-container { position: relative; height: 200px; margin-bottom: 1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <h1 class="page-title">📊 Admin Dashboard</h1>
+        <p class="text-muted">Real-time inventory, sales, and business metrics</p>
+    </div>
+
+    <!-- ===== KPI CARDS ROW 1: SALES & REVENUE ===== -->
+    <div class="row mb-4">
+        <!-- Total Revenue -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-success shadow h-100">
+                <div class="card-body">
+                    <div class="text-success metric-label">Total Revenue</div>
+                    <div class="h3 mb-0 font-weight-bold">${{ total_revenue|floatformat:2 }}</div>
+                    <small class="text-muted">All completed invoices</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Revenue -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-info shadow h-100">
+                <div class="card-body">
+                    <div class="text-info metric-label">Monthly Revenue</div>
+                    <div class="h3 mb-0 font-weight-bold">${{ monthly_revenue|floatformat:2 }}</div>
+                    <small class="text-muted">Last 30 days</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Average Order Value -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-primary shadow h-100">
+                <div class="card-body">
+                    <div class="text-primary metric-label">Avg Order Value</div>
+                    <div class="h3 mb-0 font-weight-bold">${{ avg_order_value|floatformat:2 }}</div>
+                    <small class="text-muted">{{ total_orders }} total orders</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Count -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-primary shadow h-100">
+                <div class="card-body">
+                    <div class="text-primary metric-label">Monthly Orders</div>
+                    <div class="h3 mb-0 font-weight-bold">{{ monthly_orders }}</div>
+                    <small class="text-muted">Last 30 days</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== KPI CARDS ROW 2: INVENTORY ===== -->
+    <div class="row mb-4">
+        <!-- Total Items -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-success shadow h-100">
+                <div class="card-body">
+                    <div class="text-success metric-label">Total Items</div>
+                    <div class="h3 mb-0 font-weight-bold">{{ total_items }}</div>
+                    <small class="text-muted">Units in all locations</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Value -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-info shadow h-100">
+                <div class="card-body">
+                    <div class="text-info metric-label">Total Inventory Value</div>
+                    <div class="h3 mb-0 font-weight-bold">${{ total_inventory_value|floatformat:2 }}</div>
+                    <small class="text-muted">Valuation at cost</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Alert -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-warning shadow h-100">
+                <div class="card-body">
+                    <div class="text-warning metric-label">Low Stock Items</div>
+                    <div class="h3 mb-0 font-weight-bold text-warning">{{ low_stock_count }}</div>
+                    <small class="text-muted">Below reorder level</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Out of Stock -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-danger shadow h-100">
+                <div class="card-body">
+                    <div class="text-danger metric-label">Out of Stock</div>
+                    <div class="h3 mb-0 font-weight-bold text-danger">{{ out_of_stock_count }}</div>
+                    <small class="text-muted">Zero units available</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== KPI CARDS ROW 2.5: PURCHASES & DIRECT SALES (NEW) ===== -->
+    <div class="row mb-4">
+        <!-- Total Purchases -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-success shadow h-100">
+                <div class="card-body">
+                    <div class="text-success metric-label">📥 Total Purchases</div>
+                    <div class="h3 mb-0 font-weight-bold">{{ total_purchases_count }}</div>
+                    <small class="text-muted">Procurement entries</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Purchase Value -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-info shadow h-100">
+                <div class="card-body">
+                    <div class="text-info metric-label">Purchase Value</div>
+                    <div class="h3 mb-0 font-weight-bold">₹{{ total_purchases_value|floatformat:2 }}</div>
+                    <small class="text-muted">Total inventory cost</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Direct Sales Count -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-primary shadow h-100">
+                <div class="card-body">
+                    <div class="text-primary metric-label">📤 Direct Sales</div>
+                    <div class="h3 mb-0 font-weight-bold">{{ total_sales_count }}</div>
+                    <small class="text-muted">Non-invoice sales</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Direct Sales Value -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-success shadow h-100">
+                <div class="card-body">
+                    <div class="text-success metric-label">Direct Sale Value</div>
+                    <div class="h3 mb-0 font-weight-bold">₹{{ total_sales_value|floatformat:2 }}</div>
+                    <small class="text-muted">Revenue from direct sales</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== KPI CARDS ROW 3: CUSTOMERS & INVOICES ===== -->
+    <div class="row mb-4">
+        <!-- Total Customers -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-primary shadow h-100">
+                <div class="card-body">
+                    <div class="text-primary metric-label">Total Customers</div>
+                    <div class="h3 mb-0 font-weight-bold">{{ total_customers }}</div>
+                    <small class="text-muted">{{ active_customers }} active</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Customers -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-success shadow h-100">
+                <div class="card-body">
+                    <div class="text-success metric-label">New Customers</div>
+                    <div class="h3 mb-0 font-weight-bold">{{ new_customers_count }}</div>
+                    <small class="text-muted">Last 30 days</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Invoices -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-warning shadow h-100">
+                <div class="card-body">
+                    <div class="text-warning metric-label">Pending Invoices</div>
+                    <div class="h3 mb-0 font-weight-bold">{{ pending_invoices }}</div>
+                    <small class="text-muted">Awaiting payment</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overdue Invoices -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-danger shadow h-100">
+                <div class="card-body">
+                    <div class="text-danger metric-label">Overdue Invoices</div>
+                    <div class="h3 mb-0 font-weight-bold text-danger">{{ overdue_invoices }}</div>
+                    <small class="text-muted">Past due date</small>
+                </div>
+            </div>
+        </div>    </div>
+
+    <!-- ===== KPI CARDS ROW 4: DEALERS & PRODUCTS ===== -->
+    <div class="row mb-4">
+        <!-- Total Dealers -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-primary shadow h-100">
+                <div class="card-body">
+                    <div class="text-primary metric-label">👥 Total Dealers</div>
+                    <div class="h3 mb-0 font-weight-bold">{{ total_dealers }}</div>
+                    <small class="text-muted">{{ active_dealers }} active</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Dealers -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-success shadow h-100">
+                <div class="card-body">
+                    <div class="text-success metric-label">New Dealers</div>
+                    <div class="h3 mb-0 font-weight-bold">{{ new_dealers_count }}</div>
+                    <small class="text-muted">Last 30 days</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Products -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-info shadow h-100">
+                <div class="card-body">
+                    <div class="text-info metric-label">Total Products</div>
+                    <div class="h3 mb-0 font-weight-bold">{{ total_products }}</div>
+                    <small class="text-muted">{{ active_products }} active</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inactive Products -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-secondary shadow h-100">
+                <div class="card-body">
+                    <div class="text-secondary metric-label">Inactive Products</div>
+                    <div class="h3 mb-0 font-weight-bold">{{ inactive_products }}</div>
+                    <small class="text-muted">Archived</small>
+                </div>
+            </div>
+        </div>    </div>
+
+    <!-- ===== CHARTS ROW ===== -->
+    <div class="row mb-4">
+        <!-- Revenue Trend Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">📈 Revenue Trend (Last 7 Days)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="revenueTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Products Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light py-3">
+                    <h6 class="m-0 font-weight-bold text-success">🏆 Top 5 Selling Products (30 Days)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="topProductsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SECONDARY CHARTS ROW ===== -->
+    <div class="row mb-4">
+        <!-- Stock Status Chart -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light py-3">
+                    <h6 class="m-0 font-weight-bold text-info">📦 Stock Status Overview</h6>
+                </div>
+                <div class="card-body">
+                    <div class="small-chart-container">
+                        <canvas id="stockStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Breakdown -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">📋 Products Status</h6>
+                </div>
+                <div class="card-body">
+                    <div class="small-chart-container">
+                        <canvas id="productsStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Distribution -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">🏷️ Products by Category</h6>
+                </div>
+                <div class="card-body">
+                    <div class="small-chart-container">
+                        <canvas id="categoryDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== DATA TABLES ROW ===== -->
+    <div class="row mb-4">
+        <!-- Low Stock Alerts -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">⚠️ Low Stock Alerts</h6>
+                </div>
+                <div class="card-body">
+                    {% if low_stock_count > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Current Stock</th>
+                                    <th>Reorder Level</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in top_selling_products %}
+                                    <!-- Show products with low stock -->
+                                    {% if product.stock.quantity <= product.stock.reorder_level %}
+                                    <tr>
+                                        <td>{{ product.name }}</td>
+                                        <td><span class="badge bg-danger">{{ product.stock.quantity }}</span></td>
+                                        <td>{{ product.stock.reorder_level }}</td>
+                                    </tr>
+                                    {% endif %}
+                                {% empty %}
+                                    <tr><td colspan="3" class="text-center text-muted">No low stock items</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted mb-0">✅ All items are well-stocked</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Customers -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light py-3">
+                    <h6 class="m-0 font-weight-bold text-success">👥 Top Customers (by Revenue)</h6>
+                </div>
+                <div class="card-body">
+                    {% if top_customers %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Customer Name</th>
+                                    <th>Total Spent</th>
+                                    <th>Orders</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for customer in top_customers %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'malar_app:customer-detail' customer.id %}">
+                                            {{ customer.name }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">${{ customer.total_spent|floatformat:2 }}</span>
+                                    </td>
+                                    <td>{{ customer.invoices.count }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted mb-0">No customers yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== INVOICES & ACTIVITIES ROW ===== -->
+    <div class="row mb-4">
+        <!-- Pending Invoices Table -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-warning">📄 Pending Invoices</h6>
+                    <a href="{% url 'malar_app:invoice-list' %}?status=pending" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if pending_invoices > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Invoice #</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Due Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for invoice in top_selling_products %}
+                                    {% if invoice.status == 'pending' %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'malar_app:invoice-detail' invoice.id %}">
+                                                {{ invoice.invoice_number }}
+                                            </a>
+                                        </td>
+                                        <td>{{ invoice.customer.name }}</td>
+                                        <td>${{ invoice.total_amount|floatformat:2 }}</td>
+                                        <td>
+                                            {% if invoice.due_date %}
+                                                <span class="badge bg-warning">{{ invoice.due_date|date:"M d, Y" }}</span>
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                {% empty %}
+                                    <tr><td colspan="4" class="text-center text-muted">No pending invoices</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted mb-0">✅ All invoices are processed</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light py-3">
+                    <h6 class="m-0 font-weight-bold text-info">🔄 Recent Activities</h6>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    {% if recent_activities %}
+                    <div class="activity-feed">
+                        {% for activity in recent_activities %}
+                        <div class="d-flex mb-3 pb-3 border-bottom">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    {% if activity.action == 'add' %}
+                                        ➕ Stock Added
+                                    {% elif activity.action == 'remove' %}
+                                        ➖ Stock Removed
+                                    {% elif activity.action == 'sale' %}
+                                        💰 Sale
+                                    {% elif activity.action == 'return' %}
+                                        🔄 Return
+                                    {% else %}
+                                        ⚙️ {{ activity.get_action_display }}
+                                    {% endif %}
+                                </h6>
+                                <p class="mb-1 small">
+                                    <strong>{{ activity.stock.product.name }}</strong><br/>
+                                    <span class="text-muted">{{ activity.previous_quantity }} → {{ activity.new_quantity }} units</span>
+                                </p>
+                                <small class="text-muted">
+                                    {{ activity.created_at|date:"M d, Y H:i" }}
+                                    {% if activity.performed_by %}
+                                        by {{ activity.performed_by.first_name|default:activity.performed_by.username }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted mb-0">No recent activities</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SUMMARY ROW ===== -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-light py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">📈 Quick Summary</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-2">
+                            <p class="mb-1 text-muted">Total Products</p>
+                            <h5 class="mb-0">{{ total_products }} <small class="text-muted">({{ active_products }} active)</small></h5>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <p class="mb-1 text-muted">Total Customers</p>
+                            <h5 class="mb-0">{{ total_customers }} <small class="text-muted">({{ active_customers }} active)</small></h5>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <p class="mb-1 text-muted">Year-to-Date Revenue</p>
+                            <h5 class="mb-0">${{ yearly_revenue|floatformat:2 }}</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<script>
+    // Revenue Trend Chart
+    const revenueTrendCtx = document.getElementById('revenueTrendChart').getContext('2d');
+    new Chart(revenueTrendCtx, {
+        type: 'line',
+        data: {
+            labels: {{ revenue_trend_labels|safe }},
+            datasets: [{
+                label: 'Revenue ($)',
+                data: {{ revenue_trend_data }},
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#28a745',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    callback: function(value) { return '$' + value.toFixed(2); }
+                }
+            }
+        }
+    });
+
+    // Top Products Chart
+    const topProductsCtx = document.getElementById('topProductsChart').getContext('2d');
+    new Chart(topProductsCtx, {
+        type: 'bar',
+        data: {
+            labels: [
+                {% for product in top_selling_products %}
+                    '{{ product.name|truncatewords:3 }}'{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Units Sold',
+                data: [
+                    {% for product in top_selling_products %}
+                        {{ product.total_sold|default:0 }}{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                backgroundColor: [
+                    '#007bff', '#28a745', '#ffc107', '#17a2b8', '#dc3545'
+                ],
+                borderColor: [
+                    '#0056b3', '#1e7e34', '#c99a00', '#0c5460', '#721c24'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                }
+            }
+        }
+    });
+
+    // Stock Status Chart
+    const stockStatusCtx = document.getElementById('stockStatusChart').getContext('2d');
+    new Chart(stockStatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['In Stock', 'Low Stock', 'Out of Stock'],
+            datasets: [{
+                data: [{{ stock_in_stock }}, {{ stock_low_stock }}, {{ stock_out_of_stock }}],
+                backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                borderColor: ['#1e7e34', '#c99a00', '#721c24'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // Products Status Chart
+    const productsStatusCtx = document.getElementById('productsStatusChart').getContext('2d');
+    new Chart(productsStatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Active', 'Inactive'],
+            datasets: [{
+                data: [{{ active_products }}, {{ inactive_products }}],
+                backgroundColor: ['#28a745', '#6c757d'],
+                borderColor: ['#1e7e34', '#545b62'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // Category Distribution Chart
+    const categoryCtx = document.getElementById('categoryDistributionChart').getContext('2d');
+    new Chart(categoryCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ category_labels|safe }},
+            datasets: [{
+                data: {{ category_data|safe }},
+                backgroundColor: [
+                    '#007bff', '#28a745', '#ffc107', '#17a2b8', '#dc3545',
+                    '#6f42c1', '#e83e8c', '#20c997', '#fd7e14', '#0d6efd'
+                ],
+                borderColor: '#fff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+</script>
+{% endblock %}

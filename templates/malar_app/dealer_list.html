@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Dealers - Inventory Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-0">👥 Dealers</h1>
+            <p class="text-muted">Manage your dealers and distributors</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_staff %}
+            <a href="{% url 'malar_app:dealer-create' %}" class="btn btn-primary btn-lg">
+                ➕ Add Dealer
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-8">
+                    <input type="text" name="search" class="form-control" placeholder="Search by name, email, or city..." value="{{ request.GET.search }}">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-outline-primary w-100">🔍 Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dealers Table -->
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Name</th>
+                        <th>Contact Person</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>City</th>
+                        <th>Commission</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dealer in dealers %}
+                    <tr>
+                        <td class="fw-bold"><a href="{% url 'malar_app:dealer-detail' dealer.pk %}" class="text-decoration-none">{{ dealer.name }}</a></td>
+                        <td>{{ dealer.contact_person }}</td>
+                        <td><a href="mailto:{{ dealer.email }}">{{ dealer.email }}</a></td>
+                        <td>{{ dealer.phone }}</td>
+                        <td>{{ dealer.city }}</td>
+                        <td>{{ dealer.commission_percentage }}%</td>
+                        <td>
+                            {% if dealer.is_active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'malar_app:dealer-detail' dealer.pk %}" class="btn btn-sm btn-info" title="View Details">👁️</a>
+                                {% if user.is_staff %}
+                                <a href="{% url 'malar_app:dealer-update' dealer.pk %}" class="btn btn-sm btn-warning" title="Edit">✏️</a>
+                                <a href="{% url 'malar_app:dealer-delete' dealer.pk %}" class="btn btn-sm btn-danger" title="Delete">🗑️</a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <p class="mb-0">No dealers found</p>
+                            {% if user.is_staff %}
+                            <a href="{% url 'malar_app:dealer-create' %}" class="btn btn-primary btn-sm mt-2">Create First Dealer</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Last</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

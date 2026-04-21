@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice Form - Inventory Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="page-header mb-4">
+                {% if object %}
+                <h1 class="page-title">✏️ Edit Invoice</h1>
+                {% else %}
+                <h1 class="page-title">📄 Create New Invoice</h1>
+                {% endif %}
+            </div>
+
+            <!-- Form -->
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Invoice Information</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <!-- Customer -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.customer.id_for_label }}" class="form-label fw-bold">Customer <span class="text-danger">*</span></label>
+                                {{ form.customer }}
+                                {% if form.customer.errors %}<div class="invalid-feedback d-block">{{ form.customer.errors.0 }}</div>{% endif %}
+                            </div>
+
+                            <!-- Dealer -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.dealer.id_for_label }}" class="form-label fw-bold">Dealer</label>
+                                {{ form.dealer }}
+                                {% if form.dealer.errors %}<div class="invalid-feedback d-block">{{ form.dealer.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Due Date -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.due_date.id_for_label }}" class="form-label fw-bold">Due Date</label>
+                                {{ form.due_date }}
+                            </div>
+
+                        <div class="row">
+                            <!-- Tax Percentage -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.tax_percentage.id_for_label }}" class="form-label fw-bold">Tax Percentage (%)</label>
+                                {{ form.tax_percentage }}
+                                <small class="text-muted">Default: 18% (GST)</small>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-4">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label fw-bold">Notes</label>
+                            {{ form.notes }}
+                            <small class="text-muted">Additional invoice notes or payment terms</small>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                ✅ {% if object %}Update{% else %}Create{% endif %} Invoice
+                            </button>
+                            <a href="{% url 'malar_app:invoice-list' %}" class="btn btn-secondary btn-lg">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Card -->
+            <div class="card mt-4 bg-light">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">💡 Invoice Information</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2"><strong>Steps to create an invoice:</strong></p>
+                    <ol class="mb-0">
+                        <li>Select a customer from the dropdown</li>
+                        <li>Set the due date (optional)</li>
+                        <li>Configure tax percentage (default 18% GST for India)</li>
+                        <li>Click "Create Invoice"</li>
+                        <li>Add line items (products) to the invoice</li>
+                        <li>Update invoice status to Completed</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control, .form-select {
+        border: 2px solid #e9ecef;
+        padding: 10px 12px;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+</style>
+{% endblock %}

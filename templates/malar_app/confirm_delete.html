@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Delete {{ object.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-6 mx-auto">
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">⚠️ Warning</h4>
+                <p>You are about to permanently delete this product from the inventory.</p>
+                <hr>
+                <p class="mb-0">This action cannot be undone.</p>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title">Delete Product?</h3>
+                    
+                    <div class="alert alert-info">
+                        <h5>{{ object.name }}</h5>
+                        <p class="mb-0"><code>SKU: {{ object.sku }}</code></p>
+                        <p class="mb-0"><strong>Price:</strong> ₹{{ object.price }}</p>
+                    </div>
+
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                🗑️ Yes, Delete This Product
+                            </button>
+                            <a href="{% url 'malar_app:product-detail' object.sku %}" class="btn btn-secondary btn-lg">
+                                ❌ Cancel - Go Back
+                            </a>
+                        </div>
+                    </form>
+
+                    <p class="text-muted text-center mt-4">
+                        Related images and stock information will also be deleted.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

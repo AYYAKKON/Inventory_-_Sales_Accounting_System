@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Customers - Inventory Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-2">👥 Customers</h1>
+            <p class="text-muted">Manage your customers and contacts</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_staff %}
+            <a href="{% url 'malar_app:customer-create' %}" class="btn btn-primary btn-lg">
+                ➕ Add New Customer
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <form method="get" class="input-group">
+                <input type="text" name="search" class="form-control form-control-lg" placeholder="Search customers..." value="{{ request.GET.search|default:'' }}">
+                <button class="btn btn-outline-secondary" type="submit">🔍 Search</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Customers Table -->
+    {% if customers %}
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>City</th>
+                    <th>Status</th>
+                    <th>Invoices</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr>
+                    <td><strong>{{ customer.name }}</strong></td>
+                    <td>{{ customer.email }}</td>
+                    <td>{{ customer.phone|default:'—' }}</td>
+                    <td>{{ customer.city|default:'—' }}</td>
+                    <td>
+                        {% if customer.is_active %}
+                        <span class="badge bg-success">Active</span>
+                        {% else %}
+                        <span class="badge bg-danger">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ customer.invoices.count }}</td>
+                    <td>
+                        <a href="{% url 'malar_app:customer-detail' customer.pk %}" class="btn btn-sm btn-info">👁️ View</a>
+                        {% if user.is_staff %}
+                        <a href="{% url 'malar_app:customer-update' customer.pk %}" class="btn btn-sm btn-warning">✏️ Edit</a>
+                        <a href="{% url 'malar_app:customer-delete' customer.pk %}" class="btn btn-sm btn-danger">🗑️ Delete</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+            {% endif %}
+
+            <li class="page-item active"><a class="page-link" href="#">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a></li>
+
+            {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="alert alert-info text-center mt-5">
+        <div style="font-size: 48px; margin-bottom: 10px;">👤</div>
+        <h4>No Customers Yet</h4>
+        <p class="text-muted">Start by adding your first customer.</p>
+        {% if user.is_staff %}
+        <a href="{% url 'malar_app:customer-create' %}" class="btn btn-primary mt-3">
+            ➕ Create First Customer
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

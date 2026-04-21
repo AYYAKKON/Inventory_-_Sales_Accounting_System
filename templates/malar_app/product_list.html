@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Products - Inventory Management{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">
+                <span class="badge bg-info">📊</span> Product Inventory
+            </h1>
+        </div>
+        {% if user.is_staff %}
+        <div class="col-md-4 text-end">
+            <a href="{% url 'malar_app:product-create' %}" class="btn btn-success btn-lg">
+                <span>➕</span> Add New Product
+            </a>
+        </div>
+        {% elif user.is_authenticated %}
+        <div class="col-md-4 text-end">
+            <button class="btn btn-secondary btn-lg" disabled title="Admin access required">
+                <span>➕</span> Add New Product
+            </button>
+            <small class="text-muted d-block mt-2">Admin access required</small>
+        </div>
+        {% else %}
+        <div class="col-md-4 text-end">
+            <a href="{% url 'malar_app:login' %}" class="btn btn-primary btn-lg">
+                <span>🔐</span> Login to Add Products
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" name="search" class="form-control" placeholder="Search by product name or SKU..." value="{{ search_query }}">
+                </div>
+                <div class="col-md-4">
+                    <select name="category" class="form-select">
+                        <option value="">All Categories</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if category.id|stringformat:"s" == selected_category %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">🔍 Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    {% if products %}
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm hover-shadow-lg">
+                <!-- Product Image -->
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px; overflow: hidden;">
+                    {% if product.images.all %}
+                        {% for image in product.images.all %}
+                            {% if image.is_primary or forloop.first %}
+                            <img src="{{ image.image.url }}" alt="{{ image.alt_text|default:product.name }}" class="img-fluid" style="height: 100%; object-fit: cover;">
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                    <div class="text-muted text-center">
+                        <div style="font-size: 48px;">📦</div>
+                        <p>No Image</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="card-body">
+                    <h5 class="card-title text-truncate">{{ product.name }}</h5>
+                    <p class="card-text text-muted small mb-2">SKU: <code>{{ product.sku }}</code></p>
+                    <p class="card-text text-muted small mb-2">
+                        <span class="badge bg-secondary">{{ product.category.name }}</span>
+                    </p>
+                    
+                    {% if product.stock %}
+                    <p class="card-text mb-2">
+                        <strong>Stock:</strong> 
+                        {% if product.stock.is_low_stock %}
+                        <span class="badge bg-danger">{{ product.stock.quantity }} units</span>
+                        {% elif product.stock.quantity == 0 %}
+                        <span class="badge bg-secondary">Out of Stock</span>
+                        {% else %}
+                        <span class="badge bg-success">{{ product.stock.quantity }} units</span>
+                        {% endif %}
+                    </p>
+                    {% endif %}
+                    
+                    <p class="card-text">
+                        <span class="h5 text-success">₹{{ product.price }}</span>
+                    </p>
+                </div>
+
+                <div class="card-footer bg-transparent border-top">
+                    <a href="{% url 'malar_app:product-detail' product.sku %}" class="btn btn-sm btn-info w-100">👁️ View Details</a>
+                    {% if user.is_staff %}
+                    <div class="btn-group w-100 mt-2" role="group">
+                        <a href="{% url 'malar_app:product-update' product.sku %}" class="btn btn-sm btn-warning">✏️ Edit</a>
+                        <a href="{% url 'malar_app:product-delete' product.sku %}" class="btn btn-sm btn-danger">🗑️ Delete</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center mt-4">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">Previous</a>
+            </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">Last</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="alert alert-info text-center py-5">
+        <h4>❌ No Products Found</h4>
+        <p class="mb-0">Try adjusting your search or filter criteria.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

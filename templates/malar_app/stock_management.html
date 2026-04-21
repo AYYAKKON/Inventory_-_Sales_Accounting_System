@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Stock Management - Inventory System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="page-header mb-4">
+        <h1 class="page-title">📦 Stock Management</h1>
+        <p class="text-muted">Manage stock levels - Add, Remove, or Set exact quantities</p>
+    </div>
+
+    <!-- Alerts -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <!-- Low Stock Items Alert -->
+        {% if low_stock_items %}
+        <div class="col-lg-12 mb-4">
+            <div class="alert alert-warning border-2">
+                <h5 class="alert-heading">⚠️ Low Stock Alert</h5>
+                <p>{{ low_stock_items.count }} items below reorder level</p>
+                <div class="row">
+                    {% for stock in low_stock_items %}
+                    <div class="col-md-3 mb-2">
+                        <div class="badge bg-danger p-2">
+                            <strong>{{ stock.product.name }}</strong><br>
+                            Current: {{ stock.quantity }} | Reorder: {{ stock.reorder_level }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Stock Management Table -->
+        <div class="col-lg-12">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Update Stock Levels</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Product Name</th>
+                                <th>SKU</th>
+                                <th>Current Stock</th>
+                                <th>Reorder Level</th>
+                                <th>Warehouse Location</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr>
+                                <td>
+                                    <strong>{{ product.name }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ product.sku }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary fs-6">{{ product.stock.quantity }}</span>
+                                </td>
+                                <td>
+                                    {{ product.stock.reorder_level }}
+                                </td>
+                                <td>
+                                    {{ product.stock.warehouse_location|default:"Not Set" }}
+                                </td>
+                                <td>
+                                    {% if product.stock.is_low_stock %}
+                                    <span class="badge bg-danger">Low Stock</span>
+                                    {% elif product.stock.quantity == 0 %}
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                    {% else %}
+                                    <span class="badge bg-success">In Stock</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#stockModal{{ product.id }}">
+                                        ✏️ Update
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Stock Update Modal -->
+                            <div class="modal fade" id="stockModal{{ product.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-primary text-white">
+                                            <h5 class="modal-title">Update Stock: {{ product.name }}</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form method="post" class="needs-validation">
+                                            {% csrf_token %}
+                                            <div class="modal-body">
+                                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label"><strong>Current Stock:</strong> {{ product.stock.quantity }}</label>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="action{{ product.id }}" class="form-label">Action</label>
+                                                    <select class="form-select" id="action{{ product.id }}" name="action" required>
+                                                        <option value="">-- Select Action --</option>
+                                                        <option value="add">➕ Add Stock</option>
+                                                        <option value="remove">➖ Remove Stock</option>
+                                                        <option value="set">🎯 Set Exact Amount</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="quantity{{ product.id }}" class="form-label">Quantity</label>
+                                                    <input type="number" class="form-control" id="quantity{{ product.id }}" name="quantity" min="0" required>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary">Update Stock</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    No products found. Create some products first!
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.page-header {
+    border-bottom: 3px solid #0d6efd;
+    padding-bottom: 20px;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #0d6efd;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.modal-header {
+    border-bottom: 2px solid #0d6efd;
+}
+</style>
+{% endblock %}

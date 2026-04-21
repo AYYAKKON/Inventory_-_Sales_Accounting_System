@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Product Import - Inventory System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="page-header mb-4">
+                <h1 class="page-title">📥 Bulk Product Import</h1>
+                <p class="text-muted">Upload CSV file to import multiple products at once</p>
+            </div>
+
+            <!-- Alerts -->
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Import Form -->
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Upload CSV File</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="csv_file" class="form-label fw-bold">CSV File</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>
+                                <label class="input-group-text">Choose File</label>
+                            </div>
+                            <small class="form-text text-muted">
+                                📄 Only .CSV files allowed (Max 5MB)
+                            </small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-upload"></i> Import Products
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- CSV Format Instructions -->
+            <div class="card mt-4 bg-light">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">📋 CSV Format Requirements</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Your CSV file must have these columns:</strong></p>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Column Name</th>
+                                    <th>Data Type</th>
+                                    <th>Example</th>
+                                    <th>Required</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>name</code></td>
+                                    <td>Text</td>
+                                    <td>Nike Air Max</td>
+                                    <td>✅ Yes</td>
+                                </tr>
+                                <tr>
+                                    <td><code>description</code></td>
+                                    <td>Text</td>
+                                    <td>Premium running shoes</td>
+                                    <td>❌ No</td>
+                                </tr>
+                                <tr>
+                                    <td><code>sku</code></td>
+                                    <td>Text (Unique)</td>
+                                    <td>SKU-001</td>
+                                    <td>✅ Yes</td>
+                                </tr>
+                                <tr>
+                                    <td><code>price</code></td>
+                                    <td>Decimal</td>
+                                    <td>129.99</td>
+                                    <td>✅ Yes</td>
+                                </tr>
+                                <tr>
+                                    <td><code>category_name</code></td>
+                                    <td>Text</td>
+                                    <td>Footwear</td>
+                                    <td>✅ Yes</td>
+                                </tr>
+                                <tr>
+                                    <td><code>quantity</code></td>
+                                    <td>Number</td>
+                                    <td>50</td>
+                                    <td>✅ Yes</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <hr>
+
+                    <h6 class="mt-4 mb-3"><strong>Sample CSV Content:</strong></h6>
+                    <div class="bg-white p-3 rounded border" style="overflow-x: auto;">
+                        <code style="font-size: 0.9rem;">
+name,description,sku,price,category_name,quantity<br>
+Nike Air Max,Premium running shoes,SKU-001,129.99,Footwear,50<br>
+Adidas Ultra Boost,High performance sneakers,SKU-002,159.99,Footwear,45<br>
+Puma RS-X,Casual lifestyle shoe,SKU-003,99.99,Footwear,60<br>
+                        </code>
+                    </div>
+
+                    <div class="alert alert-info mt-3">
+                        <h6>💡 Tips:</h6>
+                        <ul class="mb-0">
+                            <li>Column order doesn't matter, only the names</li>
+                            <li>Categories will be auto-created if they don't exist</li>
+                            <li>SKU must be unique (duplicate SKUs will be skipped)</li>
+                            <li>Price must be a valid decimal number</li>
+                            <li>First row must be the header</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Download Sample CSV -->
+            <div class="card mt-4 bg-success-light">
+                <div class="card-body">
+                    <h5 class="card-title">📥 Sample CSV Download</h5>
+                    <p class="text-muted">Use this as a template for your import:</p>
+                    <a href="data:text/csv;charset=utf-8,name,description,sku,price,category_name,quantity%0ASample Product,A sample product,SAMPLE-001,99.99,Sample Category,10" 
+                       download="sample_import.csv" 
+                       class="btn btn-success">
+                        ⬇️ Download Sample CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.page-header {
+    border-bottom: 3px solid #0d6efd;
+    padding-bottom: 20px;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #0d6efd;
+}
+
+.bg-success-light {
+    background-color: #d1e7dd !important;
+}
+
+code {
+    color: #d63384;
+    background-color: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+</style>
+{% endblock %}

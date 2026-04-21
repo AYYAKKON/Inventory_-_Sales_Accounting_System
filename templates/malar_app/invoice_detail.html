@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}{{ invoice.invoice_number }} - Inventory Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h1 class="mb-2">Invoice #{{ invoice.invoice_number }}</h1>
+            <p class="text-muted">{{ invoice.invoice_date|date:"d M Y, H:i" }}</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'malar_app:invoice-pdf' invoice.pk %}" class="btn btn-primary" target="_blank">📥 Download PDF</a>
+            {% if user.is_staff %}
+            <a href="{% url 'malar_app:invoice-update' invoice.pk %}" class="btn btn-warning">✏️ Edit</a>
+            <a href="{% url 'malar_app:invoice-list' %}" class="btn btn-secondary">← Back</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Invoice Status -->
+    <div class="row mt-4">
+        <div class="col-md-12 mb-4">
+            <div class="alert alert-{% if invoice.status == 'completed' %}success{% elif invoice.status == 'pending' %}warning{% else %}danger{% endif %} d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>Status:</strong> 
+                    {% if invoice.status == 'pending' %}
+                    <span class="badge bg-warning">Pending</span>
+                    {% elif invoice.status == 'completed' %}
+                    <span class="badge bg-success">Completed</span>
+                    {% else %}
+                    <span class="badge bg-danger">Cancelled</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Information -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">🏢 Bill To</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2"><strong>{{ invoice.customer.name }}</strong></p>
+                    <p class="mb-2">{{ invoice.customer.email }}</p>
+                    {% if invoice.customer.phone %}
+                    <p class="mb-2">{{ invoice.customer.phone }}</p>
+                    {% endif %}
+                    <p class="mb-0">
+                        {{ invoice.customer.address }}<br>
+                        {{ invoice.customer.city }}, {{ invoice.customer.state }} {{ invoice.customer.postal_code }}<br>
+                        {{ invoice.customer.country }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">📅 Dates & Payment</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2"><strong>Invoice Date:</strong> {{ invoice.invoice_date|date:"d M Y" }}</p>
+                    <p class="mb-2"><strong>Due Date:</strong> 
+                        {% if invoice.due_date %}
+                            {{ invoice.due_date|date:"d M Y" }}
+                        {% else %}
+                            <span class="text-muted">Not set</span>
+                        {% endif %}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Payment Status:</strong> 
+                        {% if invoice.payment_status == 'paid' %}
+                            <span class="badge bg-success">{{ invoice.get_payment_status_display }}</span>
+                        {% elif invoice.payment_status == 'partial' %}
+                            <span class="badge bg-warning">{{ invoice.get_payment_status_display }}</span>
+                        {% elif invoice.payment_status == 'overdue' %}
+                            <span class="badge bg-danger">{{ invoice.get_payment_status_display }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ invoice.get_payment_status_display }}</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Details -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">💳 Payment Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <p><strong>Amount Paid:</strong></p>
+                            <p class="text-success h5">₹{{ invoice.amount_paid }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p><strong>Outstanding Amount:</strong></p>
+                            <p class="{% if invoice.get_outstanding_amount > 0 %}text-danger{% else %}text-success{% endif %} h5">₹{{ invoice.get_outstanding_amount }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p><strong>Payment Date:</strong></p>
+                            <p>{{ invoice.payment_date|date:"d M Y"|default:"Not paid yet" }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p><strong>Payment Method:</strong></p>
+                            <p>{{ invoice.get_payment_method_display|default:"Not specified" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice Items -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📦 Line Items</h5>
+                    {% if user.is_staff and invoice.status == 'pending' %}
+                    <a href="{% url 'malar_app:invoice-item-add' invoice.pk %}" class="btn btn-sm btn-light">➕ Add Item</a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if invoice.items.all %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-end">Total</th>
+                                    {% if user.is_staff %}
+                                    <th class="text-center">Actions</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in invoice.items.all %}
+                                <tr>
+                                    <td>{{ item.product.name }} ({{ item.product.sku }})</td>
+                                    <td class="text-end">₹{{ item.unit_price }}</td>
+                                    <td class="text-center">{{ item.quantity }}</td>
+                                    <td class="text-end"><strong>₹{{ item.line_total }}</strong></td>
+                                    {% if user.is_staff %}
+                                    <td class="text-center">
+                                        {% if invoice.status == 'pending' %}
+                                        <a href="{% url 'malar_app:invoice-item-delete' item.pk %}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this item?')">🗑️</a>
+                                        {% endif %}
+                                    </td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted mb-0">No items added yet. 
+                        {% if user.is_staff %}
+                        <a href="{% url 'malar_app:invoice-item-add' invoice.pk %}">Add items →</a>
+                        {% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice Summary -->
+    <div class="row mb-4">
+        <div class="col-md-6"></div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">💰 Amount Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <strong>₹{{ invoice.subtotal }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                        <span>Tax ({{ invoice.tax_percentage }}%):</span>
+                        <strong>₹{{ invoice.tax_amount }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="h5">Total Amount:</span>
+                        <strong class="h5 text-success">₹{{ invoice.total_amount }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes -->
+    {% if invoice.notes %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">📝 Notes</h5>
+                </div>
+                <div class="card-body">
+                    {{ invoice.notes|linebreaks }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Actions -->
+    {% if user.is_staff %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{% url 'malar_app:invoice-update' invoice.pk %}" class="btn btn-warning btn-lg me-2">✏️ Edit Invoice</a>
+            <a href="{% url 'malar_app:invoice-delete' invoice.pk %}" class="btn btn-danger btn-lg" onclick="return confirm('Delete this invoice?')">🗑️ Delete Invoice</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Timestamps -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <small class="text-muted">
+                Created by: {{ invoice.created_by.get_full_name|default:invoice.created_by.username }} | 
+                Created: {{ invoice.created_at|date:"d M Y, H:i" }} | 
+                Last Updated: {{ invoice.updated_at|date:"d M Y, H:i" }}
+            </small>
+        </div>
+    </div>
+</div>
+{% endblock %}

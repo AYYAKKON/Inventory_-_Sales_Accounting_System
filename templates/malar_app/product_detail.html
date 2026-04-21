@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - Product Details{% endblock %}
+
+{% block extra_css %}
+<style>
+    .carousel-inner img {
+        height: 400px;
+        object-fit: cover;
+    }
+    .thumbnail-img {
+        height: 80px;
+        object-fit: cover;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+    .thumbnail-img.active {
+        border-color: #0d6efd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'malar_app:product-list' %}">Products</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'malar_app:product-list' %}?category={{ product.category.id }}">{{ product.category.name }}</a></li>
+            <li class="breadcrumb-item active">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row mb-4">
+        <!-- Product Images Section -->
+        <div class="col-lg-6">
+            {% if images %}
+            <!-- Main Image Carousel -->
+            <div id="productCarousel" class="carousel slide mb-3 border rounded" data-bs-ride="carousel">
+                <div class="carousel-inner bg-light">
+                    {% for image in images %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <img src="{{ image.image.url }}" alt="{{ image.alt_text|default:product.name }}" class="d-block w-100">
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if images|length > 1 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                </button>
+                {% endif %}
+            </div>
+
+            <!-- Thumbnail Navigation -->
+            {% if images|length > 1 %}
+            <div class="row g-2">
+                {% for image in images %}
+                <div class="col-3">
+                    <img src="{{ image.image.url }}" alt="{{ image.alt_text|default:product.name }}" class="thumbnail-img w-100 rounded" onclick="document.querySelector('#productCarousel').querySelector('.carousel-item.active').classList.remove('active'); document.querySelectorAll('#productCarousel .carousel-item')[{{ forloop.counter0 }}].classList.add('active');">
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="bg-light border rounded d-flex align-items-center justify-content-center" style="height: 400px;">
+                <div class="text-center text-muted">
+                    <div style="font-size: 64px;">📦</div>
+                    <p>No images available</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Product Information Section -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <!-- Product Name and Status -->
+                    <h1 class="card-title">{{ product.name }}</h1>
+                    <p class="text-muted mb-3">
+                        {% if product.is_active %}
+                        <span class="badge bg-success">Active</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Inactive</span>
+                        {% endif %}
+                    </p>
+
+                    <!-- SKU and Category -->
+                    <div class="mb-3">
+                        <p class="mb-1"><strong>SKU:</strong></p>
+                        <code class="bg-light p-2 rounded d-block">{{ product.sku }}</code>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="mb-1"><strong>Category:</strong></p>
+                        <span class="badge bg-info" style="font-size: 14px;">
+                            <a href="{% url 'malar_app:product-list' %}?category={{ product.category.id }}" class="text-white text-decoration-none">{{ product.category.name }}</a>
+                        </span>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="mb-4">
+                        <p class="text-muted mb-1">Price</p>
+                        <h2 class="text-success">₹{{ product.price }}</h2>
+                    </div>
+
+                    <!-- Stock Information -->
+                    {% if stock %}
+                    <div class="card mb-4 border-info">
+                        <div class="card-header bg-info text-white">
+                            <strong>📦 Stock Information</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <p class="text-muted mb-1">Available Quantity</p>
+                                <div>
+                                    {% if stock.is_low_stock %}
+                                    <span class="badge bg-danger" style="font-size: 16px;">{{ stock.quantity }} units</span>
+                                    <small class="text-danger d-block mt-2">⚠️ Low Stock Warning</small>
+                                    {% elif stock.quantity == 0 %}
+                                    <span class="badge bg-secondary" style="font-size: 16px;">Out of Stock</span>
+                                    {% else %}
+                                    <span class="badge bg-success" style="font-size: 16px;">{{ stock.quantity }} units</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if stock.warehouse_location %}
+                            <div class="mb-2">
+                                <p class="text-muted mb-1">Storage Location</p>
+                                <p><strong>{{ stock.warehouse_location }}</strong></p>
+                            </div>
+                            {% endif %}
+
+                            <div class="mb-0">
+                                <p class="text-muted mb-1">Reorder Level</p>
+                                <p><strong>{{ stock.reorder_level }} units</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Description -->
+                    {% if product.description %}
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <p class="text-muted">{{ product.description }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Timestamps -->
+                    <div class="text-muted small mb-4">
+                        <p class="mb-1">Created: {{ product.created_at|date:"d M Y, H:i" }}</p>
+                        <p>Last Updated: {{ product.updated_at|date:"d M Y, H:i" }}</p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    {% if user.is_staff %}
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'malar_app:product-update' product.sku %}" class="btn btn-warning btn-lg">
+                            ✏️ Edit Product
+                        </a>
+                        <a href="{% url 'malar_app:product-delete' product.sku %}" class="btn btn-danger btn-lg">
+                            🗑️ Delete Product
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Information -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Additional Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Total Images:</strong> {{ images|length }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Product Status:</strong> 
+                                {% if product.is_active %}
+                                <span class="badge bg-success">Active in Inventory</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Archived</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="mt-4 mb-4">
+        <a href="{% url 'malar_app:product-list' %}" class="btn btn-outline-secondary">← Back to Products</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard - Inventory System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="page-header mb-4">
+        <h1 class="page-title">📊 Analytics Dashboard</h1>
+        <p class="text-muted">Real-time inventory metrics and insights</p>
+    </div>
+
+    <!-- Key Metrics Row -->
+    <div class="row mb-4">
+        <!-- Total Products -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-primary shadow h-100">
+                <div class="card-body">
+                    <div class="text-primary text-uppercase mb-1 font-weight-bold" style="font-size: 0.8rem;">
+                        Total Products
+                    </div>
+                    <div class="h3 mb-0 font-weight-bold">{{ total_products }}</div>
+                    <small class="text-muted">{{ active_products }} active · {{ inactive_products }} inactive</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Stock Items -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-success shadow h-100">
+                <div class="card-body">
+                    <div class="text-success text-uppercase mb-1 font-weight-bold" style="font-size: 0.8rem;">
+                        Items In Stock
+                    </div>
+                    <div class="h3 mb-0 font-weight-bold">{{ total_items_in_stock }}</div>
+                    <small class="text-muted">Total units available</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Value -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-info shadow h-100">
+                <div class="card-body">
+                    <div class="text-info text-uppercase mb-1 font-weight-bold" style="font-size: 0.8rem;">
+                        Inventory Value
+                    </div>
+                    <div class="h3 mb-0 font-weight-bold">${{ total_stock_value|floatformat:2 }}</div>
+                    <small class="text-muted">Total valuation</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Alert -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-warning shadow h-100">
+                <div class="card-body">
+                    <div class="text-warning text-uppercase mb-1 font-weight-bold" style="font-size: 0.8rem;">
+                        Low Stock Items
+                    </div>
+                    <div class="h3 mb-0 font-weight-bold text-danger">{{ low_stock_count }}</div>
+                    <small class="text-muted">Require attention</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Category Distribution Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">📁 Products by Category</h6>
+                </div>
+                <div class="card-body" data-category-data="{{ category_data|escapejs }}">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Status Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">📦 Stock Status Overview</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h4 class="text-success">{{ stock_status.in_stock }}</h4>
+                            <small class="text-muted">In Stock</small>
+                        </div>
+                        <div class="col-md-4">
+                            <h4 class="text-warning">{{ stock_status.low_stock }}</h4>
+                            <small class="text-muted">Low Stock</small>
+                        </div>
+                        <div class="col-md-4">
+                            <h4 class="text-danger">{{ stock_status.out_of_stock }}</h4>
+                            <small class="text-muted">Out of Stock</small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="progress" style="height: 30px;">
+                            <div class="progress-bar bg-success" style="width: 33%">
+                                In Stock
+                            </div>
+                            <div class="progress-bar bg-warning" style="width: 33%">
+                                Low
+                            </div>
+                            <div class="progress-bar bg-danger" style="width: 34%">
+                                Out
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Products & Categories -->
+    <div class="row">
+        <!-- Top Products -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">⭐ Top Products</h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for product in top_products %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">{{ product.name }}</h6>
+                                <small class="text-muted">
+                                    Category: {{ product.category.name }} · Price: ${{ product.price }}
+                                </small>
+                            </div>
+                            {% if product.stock %}
+                            <span class="badge bg-primary">{{ product.stock.quantity }} units</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="list-group-item text-center text-muted py-4">
+                        No products yet
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">📈 Summary Statistics</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th class="text-end">Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Total Categories</td>
+                                <td class="text-end"><strong>{{ total_categories }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Active Products</td>
+                                <td class="text-end"><strong class="text-success">{{ active_products }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Inactive Products</td>
+                                <td class="text-end"><strong class="text-danger">{{ inactive_products }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Average Stock Value</td>
+                                <td class="text-end"><strong>${{ total_stock_value|floatformat:2 }}</strong></td>
+                            </tr>
+                            <tr class="table-warning">
+                                <td><strong>⚠️ Requires Attention</strong></td>
+                                <td class="text-end"><strong>{{ low_stock_count }}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            const cardBody = document.querySelector('[data-category-data]');
+            if (!cardBody) return;
+            
+            const dataStr = cardBody.getAttribute('data-category-data');
+            const categoryData = JSON.parse(dataStr);
+            
+            const ctx = document.getElementById('categoryChart');
+            if (ctx && categoryData && categoryData.labels && categoryData.data) {
+                new Chart(ctx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: categoryData.labels,
+                        datasets: [{
+                            data: categoryData.data,
+                            backgroundColor: [
+                                '#0d6efd', '#198754', '#ffc107', '#dc3545', 
+                                '#0dcaf0', '#6f42c1', '#fd7e14', '#20c997'
+                            ],
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        } catch(e) {
+            console.error('Chart initialization error:', e);
+        }
+    });
+</script>
+
+<style>
+.page-header {
+    border-bottom: 3px solid #0d6efd;
+    padding-bottom: 20px;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #0d6efd;
+}
+
+.border-left-primary {
+    border-left: 4px solid #0d6efd !important;
+}
+
+.border-left-success {
+    border-left: 4px solid #198754 !important;
+}
+
+.border-left-info {
+    border-left: 4px solid #0dcaf0 !important;
+}
+
+.border-left-warning {
+    border-left: 4px solid #ffc107 !important;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory Report - Inventory System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="page-header mb-4">
+                <h1 class="page-title">📊 Generate Report</h1>
+                <p class="text-muted">Export inventory data to CSV or PDF</p>
+            </div>
+
+            <!-- Alerts -->
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Report Form -->
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Report Configuration</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation">
+                        {% csrf_token %}
+
+                        <!-- Report Type -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold mb-3">📋 Report Type</label>
+                            <div class="d-grid gap-2">
+                                {% for value, label in form.report_type.field.choices %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" 
+                                           name="report_type" 
+                                           value="{{ value }}" 
+                                           id="report_{{ value }}"
+                                           onchange="toggleCategoryField()">
+                                    <label class="form-check-label" for="report_{{ value }}">
+                                        <strong>{{ label }}</strong>
+                                        <small class="d-block text-muted">
+                                            {% if value == 'all' %}
+                                            Export all products in the system
+                                            {% elif value == 'low_stock' %}
+                                            Products below reorder level
+                                            {% elif value == 'category' %}
+                                            Products from specific category
+                                            {% elif value == 'inactive' %}
+                                            Inactive/disabled products
+                                            {% endif %}
+                                        </small>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Category Selection (hidden by default) -->
+                        <div class="mb-4" id="categoryField" style="display: none;">
+                            <label for="id_category" class="form-label fw-bold">Select Category</label>
+                            <select name="category" id="id_category" class="form-select">
+                                <option value="">-- Select Category --</option>
+                                {% for category in form.category.field.queryset %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Export Format -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold mb-3">📥 Export Format</label>
+                            <div class="d-grid gap-2">
+                                {% for value, label in form.export_format.field.choices %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" 
+                                           name="export_format" 
+                                           value="{{ value }}" 
+                                           id="format_{{ value }}">
+                                    <label class="form-check-label" for="format_{{ value }}">
+                                        <strong>{{ label }}</strong>
+                                        <small class="d-block text-muted">
+                                            {% if value == 'csv' %}
+                                            Comma-separated values - Open in Excel/Sheets
+                                            {% elif value == 'pdf' %}
+                                            Portable Document Format - Professional printing
+                                            {% endif %}
+                                        </small>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-download"></i> Generate & Download Report
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Report Preview Card -->
+            <div class="card mt-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">📑 Report Preview</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">Your report will include these columns:</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <tbody>
+                                <tr>
+                                    <td><code>Product Name</code></td>
+                                    <td class="text-muted">Full product name</td>
+                                </tr>
+                                <tr>
+                                    <td><code>SKU</code></td>
+                                    <td class="text-muted">Stock keeping unit</td>
+                                </tr>
+                                <tr>
+                                    <td><code>Category</code></td>
+                                    <td class="text-muted">Product category</td>
+                                </tr>
+                                <tr>
+                                    <td><code>Price</code></td>
+                                    <td class="text-muted">Unit price</td>
+                                </tr>
+                                <tr>
+                                    <td><code>Stock Quantity</code></td>
+                                    <td class="text-muted">Current stock level</td>
+                                </tr>
+                                <tr>
+                                    <td><code>Warehouse Location</code></td>
+                                    <td class="text-muted">Storage location</td>
+                                </tr>
+                                <tr>
+                                    <td><code>Status</code></td>
+                                    <td class="text-muted">Active or Inactive</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-info mt-3">
+                        <h6>💡 Tips:</h6>
+                        <ul class="mb-0">
+                            <li><strong>CSV</strong> - Perfect for importing into Excel, Google Sheets, or databases</li>
+                            <li><strong>PDF</strong> - Great for printing, emailing, or archiving</li>
+                            <li>Reports are generated with current timestamp</li>
+                            <li>Large reports may take a few seconds to generate</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleCategoryField() {
+    const categoryField = document.getElementById('categoryField');
+    const reportType = document.querySelector('input[name="report_type"]:checked').value;
+    
+    if (reportType === 'category') {
+        categoryField.style.display = 'block';
+    } else {
+        categoryField.style.display = 'none';
+    }
+}
+
+// Set default selections
+document.querySelector('input[name="report_type"][value="all"]').checked = true;
+document.querySelector('input[name="export_format"][value="csv"]').checked = true;
+</script>
+
+<style>
+.page-header {
+    border-bottom: 3px solid #0d6efd;
+    padding-bottom: 20px;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #0d6efd;
+}
+
+.form-check {
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.form-check:hover {
+    border-color: #0d6efd;
+    background-color: #f8f9fa;
+}
+
+.form-check-input:checked ~ .form-check-label {
+    color: #0d6efd;
+    font-weight: 600;
+}
+
+code {
+    color: #d63384;
+    background-color: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+</style>
+{% endblock %}

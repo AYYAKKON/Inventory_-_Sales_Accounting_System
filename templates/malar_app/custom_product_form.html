@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Edit Product{% else %}Create Product{% endif %} - Inventory System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="page-header mb-4">
+                <h1 class="page-title">
+                    {% if object %}
+                        ✏️ Edit Product
+                    {% else %}
+                        ➕ Create New Product
+                    {% endif %}
+                </h1>
+                <p class="text-muted">
+                    {% if object %}
+                        Update product details, images and stock information
+                    {% else %}
+                        Add product with images and stock information
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Alerts -->
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Product Form -->
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Product Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Product Name -->
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label fw-bold">
+                                Product Name <span class="text-danger">*</span>
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.name.errors.0 }}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Enter the product display name</small>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">
+                                Description
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.description.errors.0 }}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Detailed information about the product</small>
+                        </div>
+
+                        <div class="row">
+                            <!-- SKU -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.sku.id_for_label }}" class="form-label fw-bold">
+                                    SKU <span class="text-danger">*</span>
+                                </label>
+                                {{ form.sku }}
+                                {% if form.sku.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.sku.errors.0 }}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">Unique identifier (e.g., SKU-001)</small>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.price.id_for_label }}" class="form-label fw-bold">
+                                    Price <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    {{ form.price }}
+                                </div>
+                                {% if form.price.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.price.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Category -->
+                        <div class="mb-3">
+                            <label for="{{ form.category.id_for_label }}" class="form-label fw-bold">
+                                Category <span class="text-danger">*</span>
+                            </label>
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.category.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Unit -->
+                        <div class="mb-3">
+                            <label for="{{ form.unit.id_for_label }}" class="form-label fw-bold">
+                                Unit <span class="text-danger">*</span>
+                            </label>
+                            {{ form.unit }}
+                            {% if form.unit.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.unit.errors.0 }}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">e.g., Piece, Kg, Litre, Box, Pack, etc.</small>
+                        </div>
+
+                        <!-- Dealers -->
+                        <div class="mb-3">
+                            <label for="{{ form.dealers.id_for_label }}" class="form-label fw-bold">
+                                Dealers
+                            </label>
+                            <div class="p-3 border rounded bg-light">
+                                {% if form.dealers %}
+                                    {{ form.dealers }}
+                                    {% if form.dealers.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.dealers.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted d-block mt-2">Select dealers who will distribute this product</small>
+                                {% else %}
+                                    <p class="text-muted">No dealers available</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    <strong>Active Product</strong>
+                                    <small class="d-block text-muted">Product is available for purchase</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Stock Information -->
+                        <div class="card-header bg-success text-white mt-4 mb-3">
+                            <h6 class="mb-0">📦 Stock Information</h6>
+                        </div>
+
+                        <div class="row">
+                            <!-- Initial Stock -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.initial_stock.id_for_label }}" class="form-label fw-bold">
+                                    Initial Stock Quantity
+                                </label>
+                                {{ form.initial_stock }}
+                                {% if form.initial_stock.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.initial_stock.errors.0 }}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">Starting inventory count</small>
+                            </div>
+
+                            <!-- Reorder Level -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.reorder_level.id_for_label }}" class="form-label fw-bold">
+                                    Reorder Level <span class="text-danger">*</span>
+                                </label>
+                                {{ form.reorder_level }}
+                                {% if form.reorder_level.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.reorder_level.errors.0 }}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">Alert when stock falls below this</small>
+                            </div>
+                        </div>
+
+                        <!-- Warehouse Location -->
+                        <div class="mb-4">
+                            <label for="{{ form.warehouse_location.id_for_label }}" class="form-label fw-bold">
+                                Warehouse Location
+                            </label>
+                            {{ form.warehouse_location }}
+                            {% if form.warehouse_location.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.warehouse_location.errors.0 }}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">e.g., Aisle A, Shelf 3, Bin 5</small>
+                        </div>
+
+                        <hr>
+
+                        <!-- Product Images -->
+                        <div class="card-header bg-info text-white mt-4 mb-3">
+                            <h6 class="mb-0">🖼️ Product Images</h6>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.images.id_for_label }}" class="form-label fw-bold">
+                                Upload Images
+                            </label>
+                            <input type="file" id="{{ form.images.id_for_label }}" name="images" class="form-control" multiple accept="image/*">
+                            {% if form.images.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.images.errors.0 }}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                📸 Select multiple images (first image will be primary)
+                            </small>
+                        </div>
+
+                        <!-- Image Preview Area -->
+                        <div id="imagePreview" class="mb-4">
+                            <label class="form-label fw-bold">Image Preview</label>
+                            <div id="previewContainer" class="row g-2">
+                                <p class="text-muted text-center">No images selected</p>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                {% if object %}
+                                    ✏️ Update Product
+                                {% else %}
+                                    ✅ Create Product
+                                {% endif %}
+                            </button>
+                            <a href="{% url 'malar_app:product-list' %}" class="btn btn-secondary btn-lg">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Form Help Card -->
+            <div class="card mt-4 bg-light">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">💡 Form Guidelines</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li><strong>Product Name:</strong> Short, descriptive name (e.g., "Nike Air Max")</li>
+                        <li><strong>SKU:</strong> Must be unique across all products</li>
+                        <li><strong>Price:</strong> Use decimal format (e.g., 99.99)</li>
+                        <li><strong>Unit:</strong> Measurement unit (Piece, Kg, Litre, Box, Pack, Dozen, etc.)</li>
+                        <li><strong>Reorder Level:</strong> Stock level that triggers low stock warning</li>
+                        <li><strong>Images:</strong> Supports JPG, PNG formats. First image becomes primary</li>
+                        <li><strong>Warehouse Location:</strong> Use consistent naming (e.g., "Shelf 3" or "Aisle A-5")</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Image Preview
+document.getElementById('{{ form.images.id_for_label }}').addEventListener('change', function(e) {
+    const files = e.target.files;
+    const previewContainer = document.getElementById('previewContainer');
+    previewContainer.innerHTML = '';
+    
+    if (files.length === 0) {
+        previewContainer.innerHTML = '<p class="text-muted text-center w-100">No images selected</p>';
+        return;
+    }
+    
+    Array.from(files).forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const col = document.createElement('div');
+            col.className = 'col-md-3 col-sm-4';
+            col.innerHTML = `
+                <div class="card border-0 shadow-sm">
+                    <img src="${event.target.result}" class="card-img-top" alt="Preview ${index + 1}" style="height: 150px; object-fit: cover;">
+                    <div class="card-body p-2">
+                        <small class="text-muted">${file.name}</small>
+                        ${index === 0 ? '<span class="badge bg-primary">Primary</span>' : ''}
+                    </div>
+                </div>
+            `;
+            previewContainer.appendChild(col);
+        };
+        reader.readAsDataURL(file);
+    });
+});
+
+// Form Validation
+(function() {
+    'use strict';
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+})();
+</script>
+
+<style>
+.page-header {
+    border-bottom: 3px solid #0d6efd;
+    padding-bottom: 20px;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #0d6efd;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e9ecef;
+    padding: 10px 12px;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-check {
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.form-check:hover {
+    border-color: #198754;
+    background-color: #f8f9fa;
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+    border: 2px solid #e9ecef;
+}
+</style>
+{% endblock %}

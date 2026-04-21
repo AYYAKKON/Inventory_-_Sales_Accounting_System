@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Invoices - Inventory Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-2">📄 Invoices</h1>
+            <p class="text-muted">Manage sales invoices and orders</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_staff %}
+            <a href="{% url 'malar_app:invoice-create' %}" class="btn btn-primary btn-lg">
+                ➕ Create Invoice
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Search & Filter Form -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <form method="get" class="input-group">
+                <input type="text" name="search" class="form-control form-control-lg" placeholder="Search by invoice # or customer..." value="{{ request.GET.search|default:'' }}">
+                <button class="btn btn-outline-secondary" type="submit">🔍 Search</button>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <select name="status" class="form-select form-select-lg" onchange="this.form.submit()">
+                <option value="">All Statuses</option>
+                <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+                <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Invoices Table -->
+    {% if invoices %}
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Invoice #</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Total Amount</th>
+                    <th>Status</th>
+                    <th>Payment Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                <tr>
+                    <td><strong>{{ invoice.invoice_number }}</strong></td>
+                    <td>{{ invoice.customer.name }}</td>
+                    <td>{{ invoice.invoice_date|date:"d M Y" }}</td>
+                    <td><strong>₹{{ invoice.total_amount }}</strong></td>
+                    <td>
+                        {% if invoice.status == 'pending' %}
+                        <span class="badge bg-warning">Pending</span>
+                        {% elif invoice.status == 'completed' %}
+                        <span class="badge bg-success">Completed</span>
+                        {% else %}
+                        <span class="badge bg-danger">Cancelled</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if invoice.payment_status == 'paid' %}
+                        <span class="badge bg-success">{{ invoice.get_payment_status_display }}</span>
+                        {% elif invoice.payment_status == 'partial' %}
+                        <span class="badge bg-warning">{{ invoice.get_payment_status_display }}</span>
+                        {% elif invoice.payment_status == 'overdue' %}
+                        <span class="badge bg-danger">{{ invoice.get_payment_status_display }}</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ invoice.get_payment_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'malar_app:invoice-detail' invoice.pk %}" class="btn btn-sm btn-info">👁️ View</a>
+                        {% if user.is_staff %}
+                        <a href="{% url 'malar_app:invoice-update' invoice.pk %}" class="btn btn-sm btn-warning">✏️ Edit</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+            {% endif %}
+
+            <li class="page-item active"><a class="page-link" href="#">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a></li>
+
+            {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="alert alert-info text-center mt-5">
+        <div style="font-size: 48px; margin-bottom: 10px;">📄</div>
+        <h4>No Invoices Yet</h4>
+        <p class="text-muted">Start by creating your first invoice.</p>
+        {% if user.is_staff %}
+        <a href="{% url 'malar_app:invoice-create' %}" class="btn btn-primary mt-3">
+            ➕ Create First Invoice
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

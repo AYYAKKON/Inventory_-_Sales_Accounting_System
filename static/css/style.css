@@ -1,0 +1,475 @@
+/* Custom Styles for Inventory Management System */
+
+:root {
+    --primary-color: #0d6efd;
+    --success-color: #198754;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #0dcaf0;
+    --dark-color: #212529;
+    --light-color: #f8f9fa;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+}
+
+/* Navbar Styles */
+.navbar-brand {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Card Hover Effects */
+.card {
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1) !important;
+}
+
+.hover-shadow-lg {
+    transition: box-shadow 0.3s ease;
+}
+
+.hover-shadow-lg:hover {
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important;
+}
+
+/* Product Grid */
+.product-card {
+    height: 100%;
+}
+
+.product-image {
+    height: 250px;
+    object-fit: cover;
+    background-color: var(--light-color);
+}
+
+/* Image Carousel */
+.carousel-inner {
+    border-radius: 0.375rem;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    background-color: rgba(0,0,0,0.3);
+    width: 10%;
+    left: 0;
+    right: auto;
+}
+
+.carousel-control-next {
+    left: auto;
+    right: 0;
+}
+
+/* Badge Styles */
+.badge {
+    padding: 0.5rem 0.75rem;
+}
+
+/* Search Form */
+.input-group {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Pagination */
+.pagination {
+    margin-top: 2rem;
+}
+
+.page-link {
+    transition: all 0.2s ease;
+}
+
+.page-link:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Buttons */
+.btn {
+    transition: all 0.2s ease;
+    border-radius: 0.375rem;
+    font-weight: 500;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    border: none;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #198754 0%, #15603d 100%);
+    border: none;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    border: none;
+    color: var(--dark-color);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #bb2d3b 100%);
+    border: none;
+}
+
+/* Forms */
+.form-control,
+.form-select {
+    border-radius: 0.375rem;
+    border: 1px solid #dee2e6;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+}
+
+/* Form Enhancement - Card Styling */
+.card-header {
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* Form Labels */
+.form-label {
+    color: var(--dark-color);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-label fw-bold {
+    font-weight: 600;
+}
+
+/* Form Control Styling */
+.form-control {
+    height: 2.5rem;
+    font-size: 0.95rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-select {
+    height: 2.5rem;
+    font-size: 0.95rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Table Styling */
+.table {
+    background-color: white;
+}
+
+.table-hover tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fb;
+}
+
+.table thead th {
+    font-weight: 600;
+    vertical-align: middle;
+    padding: 1rem;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table tbody td {
+    vertical-align: middle;
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Container spacing */
+.container {
+    margin-top: 1.5rem;
+}
+
+.row.mb-4 {
+    margin-bottom: 2rem;
+}
+
+/* Summary Cards */
+.card.text-center {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.card.text-center:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+
+.card.text-center h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+}
+
+.card.text-center h5 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Alert Styling */
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+}
+
+.alert-info {
+    background-color: #cfe2ff;
+    color: #084298;
+    border-left: 4px solid #0dcaf0;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #842029;
+    border-left: 4px solid #dc3545;
+}
+
+.alert-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border-left: 4px solid #198754;
+}
+
+/* Button Spacing */
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+}
+
+button[type="submit"] {
+    min-width: 150px;
+}
+
+/* Empty State */
+.alert.alert-info.text-center {
+    background: linear-gradient(135deg, #cfe2ff 0%, #e7f1ff 100%);
+    border: 2px dashed #0dcaf0;
+    padding: 3rem 1rem;
+}
+
+/* Help Text */
+.form-text,
+.text-muted small {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+/* HR Line */
+hr {
+    border: none;
+    border-top: 1px solid #dee2e6;
+    opacity: 0.5;
+}
+
+/* Badge Enhancement */
+.badge {
+    padding: 0.5rem 0.75rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    font-size: 0.85rem;
+}
+
+/* Link Styling */
+a {
+    text-decoration: none !important;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .btn-lg {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .card.text-center h3 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Alerts */
+.alert {
+    border: none;
+    border-radius: 0.375rem;
+}
+
+.alert-messages {
+    margin-bottom: 2rem;
+}
+
+/* Stock Status Badges */
+.stock-available {
+    background-color: var(--success-color);
+}
+
+.stock-low {
+    background-color: var(--warning-color);
+}
+
+.stock-out {
+    background-color: var(--danger-color);
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    background-color: transparent;
+    padding: 0;
+    margin-bottom: 2rem;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "→";
+    padding: 0 0.75rem;
+}
+
+/* Card Headers */
+.card-header {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+    
+    .btn-lg {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    h1 {
+        font-size: 1.75rem;
+    }
+    
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 15%;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeIn 0.5s ease;
+}
+
+/* SKU Code Style */
+code {
+    background-color: var(--light-color);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-family: 'Courier New', monospace;
+    color: var(--danger-color);
+}
+
+/* Table Styles */
+table {
+    border-collapse: collapse;
+}
+
+th {
+    background-color: var(--dark-color);
+    color: white;
+    font-weight: 600;
+}
+
+tr:hover {
+    background-color: var(--light-color);
+}
+
+/* Loading State */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Input Group */
+.input-group-text {
+    background-color: white;
+    border: 1px solid #dee2e6;
+}
+
+/* Shadow Utilities */
+.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+.shadow {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.shadow-lg {
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}

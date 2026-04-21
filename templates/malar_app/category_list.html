@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Categories - Inventory Management{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">
+                <span class="badge bg-info">📂</span> Product Categories
+            </h1>
+        </div>
+        {% if user.is_staff %}
+        <div class="col-md-4 text-end">
+            <a href="{% url 'malar_app:category-create' %}" class="btn btn-success btn-lg">
+                <span>➕</span> Add Category
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if categories %}
+    <div class="row">
+        {% for category in categories %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ category.name }}</h5>
+                    {% if category.description %}
+                    <p class="card-text text-muted">{{ category.description }}</p>
+                    {% endif %}
+                    <p class="card-text">
+                        <strong>Products:</strong> 
+                        <span class="badge bg-primary">{{ category.products.count }}</span>
+                    </p>
+                    <p class="card-text text-muted small">
+                        Created: {{ category.created_at|date:"d M Y" }}
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-top">
+                    <a href="{% url 'malar_app:product-list' %}?category={{ category.id }}" class="btn btn-sm btn-info w-100">
+                        👁️ View Products
+                    </a>
+                    {% if user.is_staff %}
+                    <div class="btn-group w-100 mt-2" role="group">
+                        <a href="{% url 'malar_app:category-update' category.id %}" class="btn btn-sm btn-warning">✏️ Edit</a>
+                        <a href="{% url 'malar_app:category-delete' category.id %}" class="btn btn-sm btn-danger">🗑️ Delete</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center py-5">
+        <h4>No Categories Found</h4>
+        <p class="mb-0">
+            {% if user.is_staff %}
+            <a href="{% url 'malar_app:category-create' %}" class="btn btn-success">Create a Category</a>
+            {% endif %}
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
